@@ -122,7 +122,7 @@ button:hover {
   border-radius: var(--radius);
 
   display: flex;
-  flex-direction: column;       /* ✅ empile verticalement */
+  flex-direction: column;       /* ✅ empile verticalement oui */
   align-items: center;          /* ✅ centré sur l’axe horizontal */
   justify-content: flex-end;    /* ✅ collé en bas */
   gap: 6px;                     /* ✅ espace entre disques (au lieu du margin) */
@@ -200,3 +200,4 @@ button:hover {
     width: min(520px, 92vw);
   }
 }
+
