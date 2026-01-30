@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tour de Hanoï</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Tour de Hanoï</h1>
+
+      <div class="controls">
+        <label for="diskCount">Disques</label>
+        <select id="diskCount" aria-label="Nombre de disques">
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>          
+          <option value="8">8</option>
+        </select>
+
+        <button id="restartBtn" type="button">Recommencer</button>
+      </div>
+
+      <div class="hud">
+        <div class="moves">Coups : <span id="movesCount">0</span></div>
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <section class="board" aria-label="Zone de jeu">
+      <div class="tower" data-tower="0" tabindex="0" aria-label="Tour 1">
+        <div class="pole"></div>
+        <div class="base"></div>
+      </div>
+
+      <div class="tower" data-tower="1" tabindex="0" aria-label="Tour 2">
+        <div class="pole"></div>
+        <div class="base"></div>
+      </div>
+
+      <div class="tower" data-tower="2" tabindex="0" aria-label="Tour 3">
+        <div class="pole"></div>
+        <div class="base"></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Interaction : clique une tour source puis une tour destination. (Oui, c’est simple.)
+      </p>
+    </footer>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
