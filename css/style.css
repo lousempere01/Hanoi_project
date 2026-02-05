@@ -84,6 +84,10 @@ select, button {
   align-items: center;
   gap: 6px;
   padding: 12px;
+
+  
+  padding-bottom: 40px; /* au lieu de 12px */
+
 }
 
 .tower.selected {
@@ -113,12 +117,19 @@ select, button {
   pointer-events: none;
 }
 
+.pole,
+.base {
+  z-index: 1; /* Permet de mettre la base et la base */
+}
+
 .disk {
   height: 22px;
   border: 1px solid #333;
   border-radius: 999px;
   background: #8bc34a;
   transition: transform 150ms ease;
+  position: relative; /* permet d’appliquer z-index */
+  z-index: 2;
 }
 
 .disk.top {
