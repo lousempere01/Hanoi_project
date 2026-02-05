@@ -8,51 +8,51 @@
 </head>
 <body>
   <main class="app">
-    <header class="header">
-      <h1>Tour de Hanoï</h1>
+    <header>
+      <div class="topbar">
+        <h1>Tour de Hanoï</h1>
 
-      <div class="controls">
-        <label for="diskCount">Disques</label>
-        <select id="diskCount" aria-label="Nombre de disques">
-          <option value="3">3</option>
-          <option value="4" selected>4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>          
-          <option value="8">8</option>
-        </select>
+        <div class="controls">
+          <label for="diskCount">Disques</label>
+          <select id="diskCount">
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
 
-        <button id="restartBtn" type="button">Recommencer</button>
+          <button id="restartBtn" type="button">Recommencer</button>
+        </div>
       </div>
 
       <div class="hud">
-        <div class="moves">Coups : <span id="movesCount">0</span></div>
-        <div id="message" class="message" role="status" aria-live="polite"></div>
+        <div>Coups : <strong id="movesCount">0</strong></div>
+        <div id="message" class="info" aria-live="polite"></div>
       </div>
     </header>
 
-    <section class="board" aria-label="Zone de jeu">
-      <div class="tower" data-tower="0" tabindex="0" aria-label="Tour 1">
+    <section class="board">
+      <div class="tower" data-tower="0" tabindex="0">
         <div class="pole"></div>
         <div class="base"></div>
       </div>
 
-      <div class="tower" data-tower="1" tabindex="0" aria-label="Tour 2">
+      <div class="tower" data-tower="1" tabindex="0">
         <div class="pole"></div>
         <div class="base"></div>
       </div>
 
-      <div class="tower" data-tower="2" tabindex="0" aria-label="Tour 3">
+      <div class="tower" data-tower="2" tabindex="0">
         <div class="pole"></div>
         <div class="base"></div>
       </div>
     </section>
 
-    <footer class="footer">
-      <p>
-        Interaction : clique une tour source puis une tour destination. (Oui, c’est simple.)
-      </p>
-    </footer>
+    <div class="footer">
+      Clique une tour source puis une tour destination.
+    </div>
   </main>
 
   <script type="module" src="js/main.js"></script>
