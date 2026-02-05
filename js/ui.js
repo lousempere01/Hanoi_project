@@ -1,142 +1,152 @@
-// js/ui.js
-import { gameState, deplacerDisque, verifierVictoire } from "./game.js";
+// js/ui.js -  gestion de l’interface
 
-/**
- * Tour sélectionnée comme source.
- * null = aucune sélection
- * 0 / 1 / 2 = index de la tour
- */
+import { deplacerDisque, gameState, verifierVictoire } from "./game.js";
+
+// Variable pour mémoriser la tour source
 let selectedTower = null;
 
-/**
- * Accès simplifié aux éléments du DOM
- */
-const towersDOM = () => Array.from(document.querySelectorAll(".tower"));
-const movesDOM = () => document.getElementById("movesCount");
-const messageDOM = () => document.getElementById("message");
-
-/**
- * afficherJeu()
- * Reconstruit complètement l'affichage à partir de l'état du jeu.
- * - Lecture de gameState.towers
- * - Suppression puis recréation des disques
- */
+// Met à jour l'affichage des tours et des disques dans la page
 export function afficherJeu() {
+  const towers = document.querySelectorAll(".tower");
   const max = gameState.diskCount;
 
-  towersDOM().forEach((towerEl) => {
+  towers.forEach((towerEl) => {
+    // On récupère l'index de la tour (0, 1 ou 2)
     const idx = Number(towerEl.dataset.tower);
-
-    // Supprime tous les disques existants
-    towerEl.querySelectorAll(".disk").forEach((d) => d.remove());
-
     const arr = gameState.towers[idx];
 
-    // Ajout des disques (ordre inversé pour affichage correct en flex-column)
+    // On supprime les anciens disques pour redessiner proprement
+    towerEl.querySelectorAll(".disk").forEach((d) => d.remove());
+
+    // On recrée les disques.
+    // On boucle à l'envers (du haut du tableau vers le bas)
     for (let i = arr.length - 1; i >= 0; i--) {
       const size = arr[i];
-
       const disk = document.createElement("div");
+      
       disk.className = "disk";
-      disk.dataset.size = String(size);
-
-      // Largeur proportionnelle à la taille du disque
-      const minW = 35;
-      const maxW = 95;
+      
+      // Calcul de la largeur (entre 30% et 90%)
+      // Si max est 1 (évite division par zéro), on met 1
       const ratio = (size - 1) / (max - 1 || 1);
-      disk.style.width = `${minW + ratio * (maxW - minW)}%`;
+      const width = 30 + ratio * 60; 
+      disk.style.width = `${width}%`;
 
-      // Couleur simple (lisible, sans effet)
-      disk.style.background = `hsl(${120 + (1 - ratio) * 180}, 70%, 60%)`;
+      // Couleur dynamique (hsl) pour faire joli
+      disk.style.background = `hsl(${200 + (ratio * 100)}, 70%, 60%)`;
 
       towerEl.appendChild(disk);
     }
   });
+
+  // Met à jour le visuel de la sélection
+  updateSelectionUI();
 }
 
-/**
- * Met à jour le compteur de coups
- */
+// Met à jour l’affichage du nombre de coups joués.
 export function mettreAJourCompteurCoups() {
-  movesDOM().textContent = String(gameState.moveCount);
+  const el = document.getElementById("movesCount");
+  if (el) el.textContent = gameState.moveCount;
 }
 
-/**
- * Affiche un message utilisateur
- * type : info | error | success
- */
+// Affiche un message d’information, d’erreur ou de victoire à l’utilisateur.
 export function afficherMessage(message, type = "info") {
-  const el = messageDOM();
-  el.textContent = message || "";
-  el.classList.remove("info", "error", "success");
-  el.classList.add(type);
+  const el = document.getElementById("message");
+  if (el) {
+    el.textContent = message;
+    // On nettoie les anciennes classes et on met la nouvelle
+    el.className = `message ${type}`;
+  }
 }
 
-/**
- * Ajoute les événements de clic / clavier sur les tours
- */
+// Associe les événements utilisateur (clics, interactions) aux actions du jeu.
 export function lierEvenements() {
-  towersDOM().forEach((towerEl) => {
+  const towers = document.querySelectorAll(".tower");
+
+  towers.forEach((towerEl) => {
+    // Gestion du clic souris
     towerEl.addEventListener("click", () => {
-      handleTowerClick(Number(towerEl.dataset.tower));
+      const idx = Number(towerEl.dataset.tower);
+      handleTowerClick(idx);
+    });
+
+    // Gestion du clavier
+    towerEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault(); // Empêche le scroll de la page avec Espace
+        const idx = Number(towerEl.dataset.tower);
+        handleTowerClick(idx);
+      }
     });
   });
 }
 
-/**
- * Réinitialise la sélection de tour
- */
+// Fonction utilitaire pour réinitialiser la sélection (exportée pour main.js)
 export function resetSelection() {
   selectedTower = null;
-  towersDOM().forEach((t) => t.classList.remove("selected"));
+  updateSelectionUI();
 }
 
-/**
- * Gestion des clics sur les tours
- * - 1er clic : sélection de la source
- * - 2e clic : tentative de déplacement
- */
+// --- Fonctions internes (logique d'interaction) ---
+
 function handleTowerClick(idx) {
-  // Sélection de la tour source
+  // Cas 1 : Aucune sélection -> On choisit la source
   if (selectedTower === null) {
+    // On ne peut pas sélectionner une tour vide
+    if (gameState.towers[idx].length === 0) {
+      afficherMessage("Cette tour est vide.", "error");
+      return;
+    }
+    
     selectedTower = idx;
     updateSelectionUI();
-    afficherMessage(`Source = Tour ${idx + 1}. Clique une destination.`, "info");
     return;
   }
 
-  // Tentative de déplacement
+  // Cas 2 : On clique sur la même tour -> Annulation
+  if (selectedTower === idx) {
+    resetSelection();
+    afficherMessage("Sélection annulée.", "info");
+    return;
+  }
+
+  // Cas 3 : Tentative de déplacement
+  // On définit 'from' et 'to' pour les utiliser dans le message plus bas
   const from = selectedTower;
   const to = idx;
 
-const res = deplacerDisque(from, to);
+  const result = deplacerDisque(from, to);
 
-if (!res.ok) {
-  afficherMessage(res.reason, "error");
-  resetSelection(); 
-  return;
-}
+  if (result.ok) {
+    // Mouvement réussi
+    afficherJeu();
+    mettreAJourCompteurCoups();
+    
+    // On vérifie la victoire d'abord
+    if (verifierVictoire()) {
+      afficherMessage(`Bravo ! Gagné en ${gameState.moveCount} coups !`, "success");
+      resetSelection();
+    } else {
+      // Si pas de victoire, on affiche le message de déplacement
+      afficherMessage(`OK: Tour ${from + 1} → Tour ${to + 1}`, "info");
+      resetSelection();
+    }
 
-
-  // Mise à jour après déplacement valide
-  afficherJeu();
-  mettreAJourCompteurCoups();
-
-  if (verifierVictoire()) {
-    afficherMessage(`Victoire en ${gameState.moveCount} coups !`, "success");
-    resetSelection();
-    return;
+  } else {
+    // Erreur (règle non respectée)
+    afficherMessage(result.reason, "error");
+    resetSelection(); // On force la désélection
   }
-
-  afficherMessage(`OK: Tour ${from + 1} → Tour ${to + 1}`, "info");
-  resetSelection();
 }
 
-/**
- * Met à jour la surbrillance de la tour source sélectionnée
- */
+// Ajoute la classe CSS .selected à la tour active
 function updateSelectionUI() {
-  towersDOM().forEach((t) => t.classList.remove("selected"));
-  const el = towersDOM()[selectedTower];
-  if (el) el.classList.add("selected");
+  const towers = document.querySelectorAll(".tower");
+  towers.forEach((t, i) => {
+    if (i === selectedTower) {
+      t.classList.add("selected");
+    } else {
+      t.classList.remove("selected");
+    }
+  });
 }
