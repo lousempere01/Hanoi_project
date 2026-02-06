@@ -22,8 +22,29 @@
             <option value="7">7</option>
             <option value="8">8</option>
           </select>
+          
+
+          <label for="colorPalette">Palette :</label>
+          <select id="colorPalette">
+            <option value="fire">Feu (rouge → blanc)</option>
+            <option value="jade">Jade (vert → clair)</option>
+            <option value="ice">Glace (bleu → blanc)</option>
+            <option value="gold">Or (or → ivoire)</option>
+          </select>
+
+          
+
+          <div id="timerContainer">
+           Temps : <span id="timer">0:00</span>
+          </div>
+          <div id="controls">
+
+          <button id="pauseBtn">Pause</button>
+
+          <button id="undoBtn" type="button">Annuler coup</button>
 
           <button id="restartBtn" type="button">Recommencer</button>
+
         </div>
       </div>
 
@@ -58,7 +79,7 @@
   <li>Les disques commencent tous sur la première tour.</li>
   <li>Un seul disque peut être déplacé à la fois.</li>
   <li>Un disque ne peut jamais être posé sur un disque plus petit.</li>
-  <li>L’objectif est de déplacer tous les disques sur la troisième tour.</li>
+  <li>L’objectif est de déplacer tous les disques sur la troisième tour.</li> 
 </ul>
 
   </main>
