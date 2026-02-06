@@ -1,152 +1,217 @@
-// js/ui.js -  gestion de l’interface
-
+// js/ui.js
 import { deplacerDisque, gameState, verifierVictoire } from "./game.js";
 
-// Variable pour mémoriser la tour source
 let selectedTower = null;
+let currentPalette = "fire";
 
-// Met à jour l'affichage des tours et des disques dans la page
+// Verrou de démarrage : tant que true, le premier clic lance la partie + timer
+let startLocked = true;
+
+// Fonction appelée au moment où on débloque (définie dans main.js)
+let onStart = null;
+
+export function setStartLock(value) {
+  startLocked = !!value;
+  if (startLocked) resetSelection();
+}
+
+export function setOnStart(callback) {
+  onStart = callback;
+}
+
+
+// Etat de pause (géré depuis main.js)
+let paused = false;
+
+export function setPaused(value) {
+  paused = !!value;
+  // En pause, on annule la sélection en cours pour éviter les états chelous
+  if (paused) resetSelection();
+}
+
+export function isPaused() {
+  return paused;
+}
+
+const palettes = {
+  fire: (ratio) => {
+    const hue = ratio * 55;
+    const light = 45 + ratio * 30;
+    return `hsl(${hue}, 85%, ${light}%)`;
+  },
+  jade: (ratio) => {
+    const hue = 165;
+    const light = 35 + ratio * 40;
+    return `hsl(${hue}, 55%, ${light}%)`;
+  },
+  ice: (ratio) => {
+    const hue = 210;
+    const sat = 60 - ratio * 40;
+    const light = 50 + ratio * 35;
+    return `hsl(${hue}, ${sat}%, ${light}%)`;
+  },
+  gold: (ratio) => {
+    const hue = 45;
+    const light = 40 + ratio * 35;
+    return `hsl(${hue}, 80%, ${light}%)`;
+  },
+};
+
 export function afficherJeu() {
   const towers = document.querySelectorAll(".tower");
   const max = gameState.diskCount;
 
   towers.forEach((towerEl) => {
-    // On récupère l'index de la tour (0, 1 ou 2)
     const idx = Number(towerEl.dataset.tower);
     const arr = gameState.towers[idx];
 
-    // On supprime les anciens disques pour redessiner proprement
     towerEl.querySelectorAll(".disk").forEach((d) => d.remove());
 
-    // On recrée les disques.
-    // On boucle à l'envers (du haut du tableau vers le bas)
     for (let i = arr.length - 1; i >= 0; i--) {
       const size = arr[i];
+
       const disk = document.createElement("div");
-      
       disk.className = "disk";
-      
-      // Calcul de la largeur (entre 30% et 90%)
-      // Si max est 1 (évite division par zéro), on met 1
+
       const ratio = (size - 1) / (max - 1 || 1);
-      const width = 30 + ratio * 60; 
+      const invRatio = 1 - ratio;
+
+      const width = 30 + ratio * 60;
       disk.style.width = `${width}%`;
 
-      // Couleur dynamique (hsl) pour faire joli
-      disk.style.background = `hsl(${200 + (ratio * 100)}, 70%, 60%)`;
+      const paletteFn = palettes[currentPalette] || palettes.fire;
+      disk.style.background = paletteFn(invRatio);
 
       towerEl.appendChild(disk);
     }
   });
 
-  // Met à jour le visuel de la sélection
   updateSelectionUI();
+
+  // désactive "annuler" si pas d'historique
+  const undoBtn = document.getElementById("undoBtn");
+  if (undoBtn) undoBtn.disabled = !gameState.history || gameState.history.length === 0;
 }
 
-// Met à jour l’affichage du nombre de coups joués.
 export function mettreAJourCompteurCoups() {
   const el = document.getElementById("movesCount");
-  if (el) el.textContent = gameState.moveCount;
+  if (el) el.textContent = String(gameState.moveCount);
 }
 
-// Affiche un message d’information, d’erreur ou de victoire à l’utilisateur.
 export function afficherMessage(message, type = "info") {
   const el = document.getElementById("message");
-  if (el) {
-    el.textContent = message;
-    // On nettoie les anciennes classes et on met la nouvelle
-    el.className = `message ${type}`;
-  }
+  if (!el) return;
+  el.textContent = message || "";
+  el.className = type;
 }
 
-// Associe les événements utilisateur (clics, interactions) aux actions du jeu.
 export function lierEvenements() {
   const towers = document.querySelectorAll(".tower");
 
   towers.forEach((towerEl) => {
-    // Gestion du clic souris
     towerEl.addEventListener("click", () => {
-      const idx = Number(towerEl.dataset.tower);
-      handleTowerClick(idx);
+      handleTowerClick(Number(towerEl.dataset.tower));
     });
 
-    // Gestion du clavier
     towerEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault(); // Empêche le scroll de la page avec Espace
-        const idx = Number(towerEl.dataset.tower);
-        handleTowerClick(idx);
+        e.preventDefault();
+        handleTowerClick(Number(towerEl.dataset.tower));
       }
     });
   });
+
+  const paletteSelect = document.getElementById("colorPalette");
+  if (paletteSelect) {
+    currentPalette = paletteSelect.value || "fire";
+    paletteSelect.addEventListener("change", () => {
+      currentPalette = paletteSelect.value;
+      afficherJeu();
+    });
+  }
 }
 
-// Fonction utilitaire pour réinitialiser la sélection (exportée pour main.js)
 export function resetSelection() {
   selectedTower = null;
   updateSelectionUI();
 }
 
-// --- Fonctions internes (logique d'interaction) ---
-
 function handleTowerClick(idx) {
-  // Cas 1 : Aucune sélection -> On choisit la source
+  // ✅ Bloque toute action si pause
+  if (paused) {
+    afficherMessage("Jeu en pause. Reprends pour jouer.", "info");
+    return;
+  }
+
+    // Si la partie n'a pas encore commencé :
+  // premier clic => on débloque + on lance le timer (via main.js),
+  // puis on CONTINUE normalement (ce clic devient la sélection source)
+  if (startLocked) {
+    startLocked = false;
+    if (typeof onStart === "function") onStart();
+    // pas de return : on continue pour traiter ce clic normalement
+  }
+
+
   if (selectedTower === null) {
-    // On ne peut pas sélectionner une tour vide
     if (gameState.towers[idx].length === 0) {
       afficherMessage("Cette tour est vide.", "error");
       return;
     }
-    
     selectedTower = idx;
     updateSelectionUI();
+    afficherMessage(`Source = Tour ${idx + 1}. Choisis une destination.`, "info");
     return;
   }
 
-  // Cas 2 : On clique sur la même tour -> Annulation
   if (selectedTower === idx) {
     resetSelection();
     afficherMessage("Sélection annulée.", "info");
     return;
   }
 
-  // Cas 3 : Tentative de déplacement
-  // On définit 'from' et 'to' pour les utiliser dans le message plus bas
   const from = selectedTower;
   const to = idx;
 
   const result = deplacerDisque(from, to);
 
-  if (result.ok) {
-    // Mouvement réussi
-    afficherJeu();
-    mettreAJourCompteurCoups();
-    
-    // On vérifie la victoire d'abord
-    if (verifierVictoire()) {
-      afficherMessage(`Bravo ! Gagné en ${gameState.moveCount} coups !`, "success");
-      resetSelection();
-    } else {
-      // Si pas de victoire, on affiche le message de déplacement
-      afficherMessage(`OK: Tour ${from + 1} → Tour ${to + 1}`, "info");
-      resetSelection();
-    }
-
-  } else {
-    // Erreur (règle non respectée)
+  if (!result.ok) {
     afficherMessage(result.reason, "error");
-    resetSelection(); // On force la désélection
+    resetSelection();
+    return;
   }
+
+  afficherJeu();
+  mettreAJourCompteurCoups();
+
+  if (verifierVictoire()) {
+    afficherMessage(`🎉 Bravo ! Gagné en ${gameState.moveCount} coups !`, "success");
+    lancerConfettis();
+    resetSelection();
+    return;
+  }
+
+  afficherMessage(`OK: Tour ${from + 1} → Tour ${to + 1}`, "info");
+  resetSelection();
 }
 
-// Ajoute la classe CSS .selected à la tour active
 function updateSelectionUI() {
   const towers = document.querySelectorAll(".tower");
-  towers.forEach((t, i) => {
-    if (i === selectedTower) {
-      t.classList.add("selected");
-    } else {
-      t.classList.remove("selected");
-    }
-  });
+  towers.forEach((t, i) => t.classList.toggle("selected", i === selectedTower));
+}
+
+function lancerConfettis() {
+  const colors = ["#e63946", "#f1fa3c", "#ffd166", "#06d6a0", "#118ab2"];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    const size = 6 + Math.random() * 6;
+    c.style.width = size + "px";
+    c.style.height = size + "px";
+    c.style.animationDuration = 2 + Math.random() * 2 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
 }
