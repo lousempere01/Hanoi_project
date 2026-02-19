@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tour de Hanoï</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
   <main class="app">
     <header>
@@ -22,7 +24,7 @@
             <option value="7">7</option>
             <option value="8">8</option>
           </select>
-          
+
 
           <label for="colorPalette">Palette :</label>
           <select id="colorPalette">
@@ -32,26 +34,28 @@
             <option value="gold">Or (or → ivoire)</option>
           </select>
 
-          
+
 
           <div id="timerContainer">
-           Temps : <span id="timer">0:00</span>
+            Temps : <span id="timer">0:00</span>
           </div>
           <div id="controls">
 
-          <button id="pauseBtn">Pause</button>
+            <button id="pauseBtn">Pause</button>
 
-          <button id="undoBtn" type="button">Annuler coup</button>
+            <button id="undoBtn" type="button" disabled>Annuler coup</button>
 
-          <button id="restartBtn" type="button">Recommencer</button>
+            <button id="restartBtn" type="button">Recommencer</button>
 
+            <button id="challengeBtn" type="button">Mode Défi : OFF</button>
+
+          </div>
         </div>
-      </div>
 
-      <div class="hud">
-        <div>Coups : <strong id="movesCount">0</strong></div>
-        <div id="message" class="info" aria-live="polite"></div>
-      </div>
+        <div class="hud">
+          <div>Coups : <strong id="movesCount">0</strong></div>
+          <div id="message" class="info" aria-live="polite"></div>
+        </div>
     </header>
 
     <section class="board">
@@ -72,18 +76,18 @@
     </section>
 
     <div class="footer">
-      Clique une tour source puis une tour destination.
+      Clique sur une tour source puis une tour destination.
     </div>
     <ul class="rules">
-  <li>Le jeu comporte trois tours.</li>
-  <li>Les disques commencent tous sur la première tour.</li>
-  <li>Un seul disque peut être déplacé à la fois.</li>
-  <li>Un disque ne peut jamais être posé sur un disque plus petit.</li>
-  <li>L’objectif est de déplacer tous les disques sur la troisième tour.</li> 
-</ul>
+      <li>Le jeu comporte trois tours.</li>
+      <li>Un seul disque peut être déplacé à la fois.</li>
+      <li>Un disque ne peut jamais être posé sur un disque plus petit.</li>
+      <li>L’objectif est de déplacer tous les disques sur la troisième tour.</li>
+    </ul>
 
   </main>
 
   <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
