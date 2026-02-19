@@ -5,11 +5,13 @@ export const gameState = {
   towers: [[], [], []],
   diskCount: 4,
   moveCount: 0,
-  history : []
+  history : [],
+  isChallengeMode: false,
+  movesLeft: 0
 };
 
 // initialise l’état du jeu et crée les disques sur la première tour.
-export function initialiserJeu(nombreDeDisques) {
+export function initialiserJeu(nombreDeDisques, isChallengeMode = false ) {
   // On convertit en nombre entier
   let n = parseInt(nombreDeDisques);
   if (isNaN(n)) n = 4; // Sécurité
@@ -18,6 +20,15 @@ export function initialiserJeu(nombreDeDisques) {
   gameState.moveCount = 0;
   gameState.towers = [[], [], []];
   gameState.history = [];
+
+  // Configuration du mode défi
+  gameState.isChallengeMode = isChallengeMode;
+  if (isChallengeMode) {
+    //Formule mathématique du score parfait : 2^n - 1
+    gameState.movesLeft = Math.pow(2, n) - 1;
+  } else {
+    gameState.movesLeft = 0;
+  }
 
   // On remplit la première tour (index 0)
   // Boucle de n jusqu'à 1 pour avoir le plus petit (1) en haut de la pile
@@ -74,6 +85,12 @@ export function deplacerDisque(tourSource, tourDestination) {
     // On augmente le compteur
     gameState.moveCount++;
 
+    // Si on est en mode défi, on réduit les coups restants
+    if (gameState.isChallengeMode) {
+      gameState.movesLeft--;
+    }
+
+
     gameState.history.push({ from: tourSource, to: tourDestination });
 
     return { ok: true };
@@ -101,6 +118,11 @@ export function annulerDernierCoup() {
 
   // on réduit le compteur de coups
   gameState.moveCount--;
+
+  // Si on est en mode défi, on doit aussi réaugmenter les coups restants
+  if (gameState.isChallengeMode) {
+    gameState.movesLeft++;
+  }
 
   return { ok: true };
 }
