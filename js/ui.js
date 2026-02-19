@@ -4,11 +4,9 @@ import { deplacerDisque, gameState, verifierVictoire } from "./game.js";
 let selectedTower = null;
 let currentPalette = "fire";
 
-// Verrou de démarrage : tant que true, le premier clic lance la partie + timer
 let startLocked = true;
-
-// Fonction appelée au moment où on débloque (définie dans main.js)
 let onStart = null;
+let onWin = null;
 
 export function setStartLock(value) {
   startLocked = !!value;
@@ -19,13 +17,18 @@ export function setOnStart(callback) {
   onStart = callback;
 }
 
+export function setOnWin(callback) {
+  onWin = callback;
+}
 
-// Etat de pause (géré depuis main.js)
+export function isStartLocked() {
+  return startLocked;
+}
+
 let paused = false;
 
 export function setPaused(value) {
   paused = !!value;
-  // En pause, on annule la sélection en cours pour éviter les états chelous
   if (paused) resetSelection();
 }
 
@@ -88,14 +91,22 @@ export function afficherJeu() {
 
   updateSelectionUI();
 
-  // désactive "annuler" si pas d'historique
   const undoBtn = document.getElementById("undoBtn");
-  if (undoBtn) undoBtn.disabled = !gameState.history || gameState.history.length === 0;
+  if (undoBtn){
+    undoBtn.disabled = !gameState.history || gameState.history.length === 0;
+  }
 }
 
 export function mettreAJourCompteurCoups() {
   const el = document.getElementById("movesCount");
-  if (el) el.textContent = String(gameState.moveCount);
+  if (el){
+    if (gameState.isChallengeMode){
+      el.textContent = `${gameState.movesLeft} restant(s)`;
+      el.style.color = gameState.movesLeft <= 3 ? "var(--danger)" : "inherit";
+    } else {
+      el.textContent = String(gameState.moveCount);
+    }
+  }
 }
 
 export function afficherMessage(message, type = "info") {
@@ -137,21 +148,26 @@ export function resetSelection() {
 }
 
 function handleTowerClick(idx) {
-  // ✅ Bloque toute action si pause
   if (paused) {
     afficherMessage("Jeu en pause. Reprends pour jouer.", "info");
     return;
   }
 
-    // Si la partie n'a pas encore commencé :
-  // premier clic => on débloque + on lance le timer (via main.js),
-  // puis on CONTINUE normalement (ce clic devient la sélection source)
+  if (verifierVictoire()) {
+    afficherMessage("Partie déjà gagnée !", "info");
+    return;
+  }
+
+  if (gameState.isChallengeMode && gameState.movesLeft <= 0 && selectedTower === null && !verifierVictoire()) {
+    afficherMessage("💥 Défi perdu ! Annule un coup ou recommence.", "error");
+    return;
+  }
+
+
   if (startLocked) {
     startLocked = false;
     if (typeof onStart === "function") onStart();
-    // pas de return : on continue pour traiter ce clic normalement
   }
-
 
   if (selectedTower === null) {
     if (gameState.towers[idx].length === 0) {
@@ -188,6 +204,8 @@ function handleTowerClick(idx) {
     afficherMessage(`🎉 Bravo ! Gagné en ${gameState.moveCount} coups !`, "success");
     lancerConfettis();
     resetSelection();
+    if(typeof onWin === "function") onWin();
+
     return;
   }
 
