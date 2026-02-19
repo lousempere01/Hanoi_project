@@ -3,13 +3,15 @@ import { annulerDernierCoup, initialiserJeu } from "./game.js";
 import {
   afficherJeu,
   afficherMessage,
+  isPaused,
+  isStartLocked,
   lierEvenements,
   mettreAJourCompteurCoups,
   resetSelection,
+  setOnStart,
+  setOnWin,
   setPaused,
-  isPaused,
-  setStartLock,   
-  setOnStart 
+  setStartLock
 } from "./ui.js";
 
 // ===== TIMER (simple) =====
@@ -63,7 +65,6 @@ function ensurePauseOverlay() {
   document.body.appendChild(overlay);
 
   overlay.addEventListener("click", (e) => {
-    // clic hors de la boîte = reprendre (optionnel)
     if (e.target === overlay) togglePause();
   });
 
@@ -72,39 +73,53 @@ function ensurePauseOverlay() {
 }
 
 function setControlsDisabled(disabled) {
-  const ids = ["diskCount", "colorPalette", "undoBtn", "restartBtn"];
+  const ids = ["diskCount", "colorPalette", "restartBtn"];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.disabled = disabled;
   });
+
+  //Gestion intelligente du bouton annuler
+  const undoBtn = document.getElementById("undoBtn");
+  if (undoBtn) {
+    if (disabled) {
+      // Si le jeu est en pause, on désactive le bouton annuler
+      undoBtn.disabled = true;
+    } else {
+      // Si le jeu tourne (ou démarre), il n'est actif que s'il y a un historique
+      undoBtn.disabled - gameState.history.length === 0;
+    }
+  }
 }
 
 // Fonction pour lancer une partie
 function demarrer(n) {
-  initialiserJeu(n);
+
+  const challengeBtn = document.getElementById("challengeBtn");
+  const isChallenge = challengeBtn ? challengeBtn.classList.contains("active") : false;
+
+  initialiserJeu(n, isChallenge);
   resetSelection();
   afficherJeu();
   mettreAJourCompteurCoups();
 
-  // Reset timer MAIS ne démarre pas tout de suite
   resetTimer();
   stopTimer();
 
-  // Jeu pas en pause, mais verrouillé jusqu’au 1er clic
   setPaused(false);
   setStartLock(true);
 
+  const pauseBtn = document.getElementById("pauseBtn");
+  if (pauseBtn) pauseBtn.textContent = "Pause";
+
   afficherMessage("Clique sur une tour pour démarrer (timer inclus).", "info");
 
-  // Si tu as un overlay pause, on le ferme au restart
   document.body.classList.remove("paused");
   const overlay = document.getElementById("pauseOverlay");
   if (overlay) overlay.classList.remove("show");
 
-  // Les contrôles restent utilisables avant de commencer (à toi de voir)
   setControlsDisabled(false);
 }
-
 
 function togglePause() {
   ensurePauseOverlay();
@@ -125,7 +140,10 @@ function togglePause() {
     afficherMessage("Jeu en pause.", "info");
   } else {
     // REPRENDRE
-    startTimer();
+    if (!isStartLocked()) {
+      startTimer();
+    }
+
     document.body.classList.remove("paused");
     if (overlay) overlay.classList.remove("show");
     if (pauseBtn) pauseBtn.textContent = "Pause";
@@ -139,32 +157,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnRecommencer = document.getElementById("restartBtn");
   const undoBtn = document.getElementById("undoBtn");
   const pauseBtn = document.getElementById("pauseBtn");
+  const challengeBtn = document.getElementById("challengeBtn");
 
   ensurePauseOverlay();
-
-  // branche les tours + palette
   lierEvenements();
 
-  // Quand ui.js débloque au 1er clic, on lance le timer ici (main.js)
   setOnStart(() => {
     startTimer();
     afficherMessage("Bonne chance", "info");
   });
 
+  setOnWin(() => {
+    stopTimer();
+  });
 
-  // Recommencer
+  if (challengeBtn) {
+    challengeBtn.addEventListener("click", () => {
+      // On bascule l'état du mode défi
+      challengeBtn.classList.toggle("active");
+      // On change le texte du bouton en fonction de l'état
+      if (challengeBtn.classList.contains("active")) {
+        challengeBtn.textContent = "Mode défi : ON";
+      } else {
+        challengeBtn.textContent = "Mode défi : OFF";
+      }
+      // On redémarre la partie pour appliquer le changement
+      demarrer(selectDisques.value);
+    });
+  }
+
   btnRecommencer.addEventListener("click", () => {
     demarrer(selectDisques.value);
   });
 
-  // Changer nb disques
   selectDisques.addEventListener("change", () => {
     demarrer(selectDisques.value);
   });
 
-  // Annuler
   undoBtn.addEventListener("click", () => {
-    // si pause, on ne fait rien
     if (isPaused()) return;
 
     const resultat = annulerDernierCoup();
@@ -178,9 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Pause
   pauseBtn.addEventListener("click", togglePause);
 
-  // Démarrage
   demarrer(selectDisques.value);
 });
