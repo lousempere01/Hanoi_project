@@ -99,13 +99,27 @@ h1{
 
 .controls {
   display: flex;
-  gap: 10px;
+  flex-direction: row;     /* Force l'affichage en ligne horizontale */
+  flex-wrap: wrap;         /* Autorise le passage à la ligne si l'écran est trop petit */
+  align-items: center;     /* Aligne tout parfaitement au centre verticalement */
+  gap: 15px;               /* Espace entre chaque groupe d'éléments */
+  margin-top: 10px;
+  background-color: linear-gradient(180deg, #161d26, var(--panel));
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+#controls {
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  gap: 10px;               /* Espace entre les boutons */
 }
 
 label{
   color: var(--muted);
   font-size: 13px;
+  margin: 0 10px;
 }
 
 /* Inputs */
@@ -175,7 +189,7 @@ transform: none;
   align-items: center;
 }
 
-#timeDisplay{
+#timer{
   padding: 4px 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -205,6 +219,20 @@ transform: none;
   background: rgba(63,179,162,0.12);
   border-color: rgba(63,179,162,0.4);
 }
+
+#challengeBtn {
+  transition : all 150ms ease;
+}
+
+#challengeBtn.active {
+  border-color: var(--danger);
+  color: #fff;
+  background: rgba(192, 75, 60, 0.15);
+  box-shadow:
+    0 0 0 2px rgba(192, 75, 60, 0.3),
+    0 0 15px rgba(192, 75, 60, 0.5);
+}
+
 
 /* =========================
    BOARD
