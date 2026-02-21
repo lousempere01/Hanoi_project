@@ -28,7 +28,7 @@ Ce projet utilisant des **Modules JavaScript** (`import` / `export`), il ne peut
 3. Fais un clic droit sur le fichier `index.html` et choisis **"Open with Live Server"** ou clique sur **Go Live**.
 4. Le jeu s'ouvrira automatiquement dans ton navigateur par défaut.
 
-## 👥 Répartition du travail
+## Répartition du travail
 * **Alexandre Bianchin** : Gestion des événements de l'interface (`ui.js`), implémentation de la personnalisation (palettes/disques), gestion du compteur de coups, style CSS et co-développement du fichier principal (`main.js`).
 * **Overna-Dorian Mouyele-Mbou** : Intégration de la structure HTML, implémentation de la logique du Timer, et style CSS.
 * **Lou Sempere** : Développement de la logique du jeu (`game.js`), implémentation du système d'annulation et du Mode Défi, style CSS et co-développement du fichier principal (`main.js`).
@@ -41,7 +41,7 @@ Ce projet utilisant des **Modules JavaScript** (`import` / `export`), il ne peut
 - **Gestion des états synchronisés :** S'assurer que le bouton "Annuler" se grise correctement selon l'historique et ne rentre pas en conflit avec le verrouillage du démarrage ou la pause.
 - **Liaison Timer :** Gérer l'arrêt précis du chronomètre dès la détection de la victoire ou d'une pause, sans décalage.
 
-### Améliorations possibles (Futures itérations)
+### Améliorations possibles
 - **Mode Auto-résolution :** Ajouter un algorithme récursif permettant à l'ordinateur de résoudre le puzzle tout seul sous les yeux de l'utilisateur.
 - **Animations fluides :** Animer le déplacement des disques d'une tour à l'autre avec des transitions CSS calculées en JavaScript.
 - **Sauvegarde locale** : enregistrement des meilleurs scores (High Scores) via le `localStorage` du navigateur.
