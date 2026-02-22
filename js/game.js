@@ -10,12 +10,15 @@ export const gameState = {
   movesLeft: 0
 };
 
-// initialise l’état du jeu et crée les disques sur la première tour.
+// ===== INITIALISATION =====
+
+// Initialise l’état du jeu et crée les disques sur la première tour
 export function initialiserJeu(nombreDeDisques, isChallengeMode = false ) {
   // On convertit en nombre entier
   let n = parseInt(nombreDeDisques);
-  if (isNaN(n)) n = 4; // Sécurité
+  if (isNaN(n)) n = 4; // Valeur par défaut
 
+  // Remise à zéro de l'état du jeu
   gameState.diskCount = n;
   gameState.moveCount = 0;
   gameState.towers = [[], [], []];
@@ -37,37 +40,42 @@ export function initialiserJeu(nombreDeDisques, isChallengeMode = false ) {
   }
 }
 
-// vérifie si le déplacement respecte les règles du jeu
+// ===== VERIFICATION DES REGLES =====
+
+// Vérifie si le déplacement demandé respecte les règles du jeu
 export function deplacementValide(tourSource, tourDestination) {
   const source = gameState.towers[tourSource];
   const dest = gameState.towers[tourDestination];
 
-  // La tour de départ ne doit pas être vide
+  // Règle 1 : La tour de départ ne doit pas être vide
   if (source.length === 0) {
     return false;
   }
 
-  // On ne déplace pas sur la même tour
+  // Règle 2 : On ne déplace pas sur la même tour
   if (tourSource === tourDestination) {
     return false;
   }
 
-  // On récupère les disques du sommet (fin du tableau)
+  // On regarde la taille des disques au sommet des deux tours
+  // Le disque à déplacer est celui au sommet de la tour source
   const disqueADeplacer = source[source.length - 1];
   const disqueSommetDest = dest[dest.length - 1];
 
-  // Si la destination est vide, c'est autorisé
+  // Règle 3 : Si la tour destination est vide, c'est autorisé
   if (disqueSommetDest === undefined) {
     return true;
   }
 
-  // Le disque déplacé doit être plus petit que celui de destination
+  // Règle 4 : Le disque déplacé doit strictement être plus petit que celui au sommet de la tour destination
   if (disqueADeplacer < disqueSommetDest) {
     return true;
   } else {
     return false;
   }
 }
+
+// ===== ACTIONS DE JEU =====
 
 // déplace un disque d’une tour vers une autre si le déplacement est autorisé
 export function deplacerDisque(tourSource, tourDestination) {
@@ -90,7 +98,7 @@ export function deplacerDisque(tourSource, tourDestination) {
       gameState.movesLeft--;
     }
 
-
+    // On ajoute ce déplacement à l'historique pour pouvoir l'annuler plus tard
     gameState.history.push({ from: tourSource, to: tourDestination });
 
     return { ok: true };
@@ -100,19 +108,21 @@ export function deplacerDisque(tourSource, tourDestination) {
   }
 }
 
-// Fonction pour annuler le dernier déplacement
+// ===== ANNULATION ET VICTOIRE =====
+
+// Fonction pour annuler le dernier déplacement joué
 export function annulerDernierCoup() {
   // si pas d'historique, rien à annuler
   if (gameState.history.length === 0) {
     return { ok: false, reason: "Aucun déplacement à annuler" };
   }
-  // On récupère le dernier déplacement
+  // On récupère et retire le dernier coup joué
   const lastMove = gameState.history.pop();
 
-  // On fait : on prend la destination pour remettre le disque dans la source
   const tourActuelle = gameState.towers[lastMove.to];
   const tourPrecedente = gameState.towers[lastMove.from];
-
+  
+  // On fait le chemin inverse :  on prend la destination pour remettre le disque dans la source
   const disque = tourActuelle.pop();
   tourPrecedente.push(disque);
 
