@@ -1,10 +1,12 @@
 /* =========================
-   RESET & VARIABLES
+  RESET & VARIABLES GLOBALES
    ========================= */
 
+/* Réinitialise les bordures et le padding pour faciliter le calcul des tailles */
 * { box-sizing: border-box; }
 
-:root{
+/* Variables CSS (:root) */
+:root {
   /* Fonds */
   --bg: #0e1116;
   --bg2: #090c10;
@@ -20,34 +22,33 @@
   /* Bordures */
   --border: #2a3440;
 
-  /* Accents */
-  --primary: #d18f5f;       /* cuivre */
+  /* Accents (Couleurs principales du thème) */
+  --primary: #d18f5f;
   --primarySoft: #2a1f16;
-
-  --accent: #3fb3a2;        /* jade */
+  --accent: #3fb3a2;
   --accentSoft: #132726;
 
-  --danger: #c04b3c;        /* rouge brique */
+  /* Couleurs de statut (Erreur / Succès) */
+  --danger: #c04b3c;
   --success: #3fb3a2;
 
-  /* Ombres */
+  /* Ombres et arrondis globaux */
   --shadow: 0 25px 50px rgba(0,0,0,0.7);
   --shadowSmall: 0 8px 20px rgba(0,0,0,0.6);
-
   --radius: 14px;
 }
 
-
 /* =========================
-   PAGE
+  PAGE (Le fond de l'écran)
    ========================= */
 
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  min-height: 100vh;
+  min-height: 100vh; /* Prend au moins 100% de la hauteur de l'écran */
   color: var(--text);
 
+  /* Dégradé complexe : deux halos lumineux (radial) + un dégradé linéaire classique */
   background:
     radial-gradient(700px 400px at 20% -10%, rgba(63,179,162,0.08), transparent 60%),
     radial-gradient(800px 500px at 80% 0%, rgba(209,143,95,0.08), transparent 60%),
@@ -55,12 +56,12 @@ body {
 }
 
 /* =========================
-   APP CONTAINER
+  APP CONTAINER
    ========================= */
 
 .app {
-  width: min(920px, 95vw);
-  margin: 24px auto;
+  width: min(920px, 95vw); /* Prend 920px maximum, ou 95% de l'écran sur mobile */
+  margin: 24px auto;       /* Centre la boîte horizontalement */
   padding: 18px;
 
   background: linear-gradient(180deg, #171e27, var(--card));
@@ -70,7 +71,7 @@ body {
 }
 
 /* =========================
-   HEADER
+  HEADER
    ========================= */
 
 header {
@@ -79,50 +80,53 @@ header {
   gap: 12px;
 }
 
+/* Titre */
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; /* Espace le titre et le timer aux extrémités */
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Sécurité : passe à la ligne si l'écran est trop petit */
 }
 
-h1{
+h1 {
   margin: 0;
   font-size: 20px;
   letter-spacing: 0.3px;
 }
 
 /* =========================
-   CONTROLS
+  CONTROLS
    ========================= */
 
+/* Conteneur principal des contrôles */
 .controls {
   display: flex;
-  flex-direction: row;     /* Force l'affichage en ligne horizontale */
-  flex-wrap: wrap;         /* Autorise le passage à la ligne si l'écran est trop petit */
-  align-items: center;     /* Aligne tout parfaitement au centre verticalement */
-  gap: 15px;               /* Espace entre chaque groupe d'éléments */
+  flex-direction: row;     /* Aligne les éléments à l'horizontale */
+  flex-wrap: wrap;         /* Passe à la ligne sur mobile */
+  align-items: center;     /* Centre verticalement */
+  gap: 15px;
   margin-top: 10px;
-  background-color: linear-gradient(180deg, #161d26, var(--panel));
+  background: linear-gradient(180deg, #161d26, var(--panel));
   padding: 10px 20px;
   border-radius: 8px;
 }
 
+/* Sous-groupe pour les boutons */
 #controls {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;               /* Espace entre les boutons */
+  gap: 10px;
 }
 
-label{
+label {
   color: var(--muted);
   font-size: 13px;
   margin: 0 10px;
 }
 
-/* Inputs */
+/* Base commune pour menus déroulants et boutons */
 select, button {
   padding: 9px 12px;
   border: 1px solid var(--border);
@@ -132,41 +136,44 @@ select, button {
   cursor: pointer;
 }
 
-/* Select */
-select{
+select {
   background: linear-gradient(180deg, #1c2530, #141b24);
 }
 
-/* Buttons */
-button{
+/* Animations et styles des boutons */
+button {
   background: linear-gradient(180deg, #1f2833, #161d26);
   box-shadow: var(--shadowSmall);
+  /* transition permet des animations fluides au survol */
   transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
 }
 
-button:hover{
-  transform: translateY(-1px);
+/* Effet quand la souris passe dessus (hover) */
+button:hover {
+  transform: translateY(-1px); /* Soulève légèrement le bouton */
   border-color: var(--primary);
   box-shadow:
     0 0 0 1px rgba(209,143,95,0.4),
     0 10px 25px rgba(209,143,95,0.15);
 }
 
-button:active{
+/* Effet quand on clique dessus (active) */
+button:active {
   transform: translateY(0);
 }
 
-button:disabled{
-background: #ccc;
-color:#888;
-border-color: #bbb;
-cursor: not-allowed;
-opacity: 0.7;
-transform: none;
+/* Bouton inactif */
+button:disabled {
+  background: #ccc;
+  color: #888;
+  border-color: #bbb;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
 }
 
 /* =========================
-   HUD
+  HUD (Affichage Coups & Messages)
    ========================= */
 
 .hud {
@@ -182,14 +189,13 @@ transform: none;
   background: linear-gradient(180deg, #161d26, var(--panel));
 }
 
-/* Timer */
-.timer{
+.timer {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
-#timer{
+#timer {
   padding: 4px 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -198,7 +204,7 @@ transform: none;
   letter-spacing: 0.4px;
 }
 
-/* Message */
+/* Styles dynamiques pour la boîte de messages */
 #message {
   min-height: 18px;
   padding: 6px 10px;
@@ -208,6 +214,7 @@ transform: none;
   color: var(--muted);
 }
 
+/* Ces classes sont ajoutées par JavaScript (ui.js) */
 #message.error {
   color: var(--danger);
   background: rgba(192,75,60,0.12);
@@ -220,6 +227,7 @@ transform: none;
   border-color: rgba(63,179,162,0.4);
 }
 
+/* Bouton spécial "Mode Défi" quand il est activé */
 #challengeBtn {
   transition : all 150ms ease;
 }
@@ -233,38 +241,39 @@ transform: none;
     0 0 15px rgba(192, 75, 60, 0.5);
 }
 
-
 /* =========================
-   BOARD
+  PLATEAU DE JEU
    ========================= */
 
 .board {
   margin-top: 16px;
+  /* CSS Grid : Crée exactement 3 colonnes de taille égale (1fr) */
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 
 /* =========================
-   TOWERS
+  TOURS
    ========================= */
 
 .tower {
   height: 360px;
   border: 2px solid #2a3440;
   border-radius: 16px;
-  position: relative;
+  position: relative; /* Indispensable pour positionner la tige et la base à l'intérieur */
 
   background: linear-gradient(180deg, #1a222c, #111821);
 
+  /* Flexbox utilisé pour empiler les disques de bas en haut */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+  justify-content: flex-end; /* Pousse les disques vers le bas */
+  align-items: center;       /* Centre les disques au milieu de la tour */
   gap: 7px;
 
   padding: 12px;
-  padding-bottom: 44px;
+  padding-bottom: 44px; /* Laisse de la place pour la base dessinée */
 
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.03),
@@ -273,11 +282,13 @@ transform: none;
   transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.tower:hover{
+/* Survol de la tour */
+.tower:hover {
   transform: translateY(-2px);
   border-color: rgba(63,179,162,0.45);
 }
 
+/* Style de la tour quand on a cliqué dessus (Source) */
 .tower.selected {
   border-color: var(--primary);
   box-shadow:
@@ -287,13 +298,14 @@ transform: none;
 }
 
 /* =========================
-   POLE & BASE
+  TIGE ET BASE TOURS
    ========================= */
 
+/* La tige du milieu */
 .pole {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%); /* Centre parfaitement la tige */
   bottom: 42px;
   width: 10px;
   height: 250px;
@@ -301,10 +313,12 @@ transform: none;
   background: linear-gradient(180deg, #7a818d, #5c636f);
   border-radius: 8px;
 
+  /* Empêche la tige d'intercepter les clics de souris destinés à la tour */
   pointer-events: none;
-  z-index: 1;
+  z-index: 1; /* Reste en arrière-plan */
 }
 
+/* Le socle en bas */
 .base {
   position: absolute;
   bottom: 22px;
@@ -319,13 +333,15 @@ transform: none;
 }
 
 /* =========================
-   DISKS
+  DISQUES
    ========================= */
 
 .disk {
   height: 22px;
   border-radius: 999px;
   position: relative;
+  
+  /* z-index de 2 pour passer devant la tige (z-index: 1) */
   z-index: 2;
 
   border: 1px solid rgba(255,255,255,0.25);
@@ -335,7 +351,7 @@ transform: none;
 }
 
 /* =========================
-   FOOTER
+  FOOTER
    ========================= */
 
 .footer {
@@ -346,9 +362,10 @@ transform: none;
 }
 
 /* =========================
-   RESPONSIVE
+  RESPONSIVE DESIGN
    ========================= */
 
+/* Si l'écran fait moins de 860px de large, on passe le jeu sur 1 seule colonne verticale */
 @media (max-width: 860px) {
   .board {
     grid-template-columns: 1fr;
@@ -356,7 +373,7 @@ transform: none;
 }
 
 /* =========================
-   CONFETTIS (VICTOIRE)
+  ANIMATION CONFETTIS
    ========================= */
 
 .confetti {
@@ -367,34 +384,40 @@ transform: none;
   background: red;
   opacity: 0.9;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 9999; /* Passe au-dessus de tout le reste */
+  
+  /* Appelle l'animation "fall" créée juste en dessous */
   animation: fall linear forwards;
 }
 
+/* Keyframes : définit le début et la fin de l'animation */
 @keyframes fall {
   to {
-    transform: translateY(110vh) rotate(360deg);
+    transform: translateY(110vh) rotate(360deg); /* Tombe en bas de l'écran en tournant */
     opacity: 0;
   }
 }
 
 /* =========================
-   PAUSE OVERLAY
+  PAUSE
    ========================= */
 
+/* Le fond d'écran assombri derrière la fenêtre de pause */
 #pauseOverlay {
   position: fixed;
-  inset: 0;
-  display: none;              /* caché par défaut */
-  place-items: center;
+  inset: 0;                   /* Remplace top:0, right:0, bottom:0, left:0 */
+  display: none;              /* Caché par défaut */
+  place-items: center;        /* Centre le contenu (équivalent à justify-content + align-items) */
   background: rgba(0,0,0,0.55);
   z-index: 10000;
 }
 
+/* Classe ajoutée par JS pour afficher la modale */
 #pauseOverlay.show {
   display: grid;
 }
 
+/* Fenêtre blanche de pause */
 .pauseModal {
   width: min(420px, 92vw);
   background: #ffffff;
@@ -417,7 +440,6 @@ transform: none;
   font-size: 14px;
 }
 
-/* Bouton dans la modale (reuse style bouton global si tu veux, sinon simple) */
 .pauseModal button {
   padding: 10px 14px;
   border-radius: 12px;
@@ -427,9 +449,9 @@ transform: none;
   cursor: pointer;
 }
 
-/* Quand pause: on bloque la zone de jeu (sécurité) */
+/* Quand le jeu est en pause (classe ajoutée au <body>), on floute le jeu pour empêcher de tricher */
 body.paused .board {
-  pointer-events: none;
-  filter: blur(1px);
+  pointer-events: none; /* Empêche tout clic sur le plateau */
+  filter: blur(1px);    /* Floute légèrement l'arrière-plan */
   opacity: 0.9;
 }
